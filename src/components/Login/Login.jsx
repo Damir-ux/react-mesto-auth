@@ -1,43 +1,62 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Header from "../Header/Header.jsx";
 import React from "react";
-import useformValidation from "../../utils/formValidation";
-import SectionLogin from "../SectionLogin/SectionLogin.jsx";
+import useValidation from "../../utils/useValidation";
 
-export default function Login({ name, handleLogin }) {
-  const { valuen, errors, isValid, isInputValid, handleChange } = useformValidation();
+import AuthScreen from "../AuthScreen/AuthScreen.jsx";
 
-  function onLogin(evt) {
-    evt.preventDefault();
-    handleLogin(valuen.password, valuen.email);
+function Login({ onLogin, onLoading }) {
+  const { values, errors, isFormValid, onChange } = useValidation();
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    onLogin(values);
   }
-
   return (
-    <>
-      <SectionLogin name={name} onSubmit={onLogin} isValid={isValid}>
+    <AuthScreen
+      name="login"
+      title="Вход"
+      buttonText={onLoading ? "Вход..." : "Войти"}
+      onSubmit={handleSubmit}
+      isFormValid={isFormValid}
+    >
+      <label className="form__input-wrapper">
         <input
-          id="form-email"
-          name="email"
-          className="authorization__input"
           type="email"
+          name="email"
+          form="login"
           required
           placeholder="Email"
-          value={valuen.email}
-          onChange={handleChange}
+          className={`form__input form__input_place_authorization ${
+            errors.email ? "form__input_type_error" : ""
+          }`}
+          id="email-input"
+          onChange={onChange}
+          value={values.email || ""}
         />
+        <span className={`form__input-error ${errors.email ? "form__input-error_active" : ""}`}>
+          {errors.email || ""}
+        </span>
+      </label>
+      <label className="form__input-wrapper">
         <input
-          id="form-opened-account"
-          name="password"
-          className="authorization__input"
           type="password"
+          name="password"
+          form="login"
           required
+          minLength="6"
           placeholder="Пароль"
-          value={valuen.password}
-          onChange={handleChange}
+          className={`form__input form__input_place_authorization ${
+            errors.password ? "form__input_type_error" : ""
+          }`}
+          id="password-input"
+          onChange={onChange}
+          value={values.password || ""}
         />
-        <button className="authorization__button">Войти</button>
-      </SectionLogin>
-    </>
+        <span className={`form__input-error ${errors.password ? "form__input-error_active" : ""}`}>
+          {errors.password || ""}
+        </span>
+      </label>
+    </AuthScreen>
   );
 }
+
+export default Login;

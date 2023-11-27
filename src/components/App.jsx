@@ -1,10 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
-import Header from "./Header/Header.jsx";
 import Main from "./Main/Main.jsx";
-import unionTrue from "../images/unionTrue.png";
-import unionFalse from "../images/unionFalse.png";
-import Footer from "./Footer/Footer.jsx";
 import PopupWithForm from "./PopupWithForm/PopupWithForm.jsx";
 import ImagePopup from "./ImagePopup/ImagePopup";
 import CurrentUserContext from "../contexts/CurrentUserContext.js";
@@ -12,11 +8,13 @@ import api from "../utils/api.js";
 import EditProfilePopup from "./EditProfilePopup/EditProfilePopup.jsx";
 import EditAvatarPopup from "./EditAvatarPopup/EditAvatarPopup.jsx";
 import AddPlacePopup from "./AddPlacePopup/AddPlacePopup.jsx";
-import ProtectedRoute from "./ProtectedRoute/ProtectedRoute.jsx";
+import ProtectedRouteElement from "./ProtectedRoute/ProtectedRoute.jsx";
 import Register from "./Register/Register.jsx";
 import Login from "./Login/Login.jsx";
-import { register, authorize, getContent } from "../utils/auth.js";
+import * as authApi from "../utils/authApi.js";
 import InfoTooltip from "./InfoTooltip/InfoTooltip.jsx";
+import AppLayout from "./AppLayout/AppLayout.jsx";
+import Preloader from "./Preloader/Preloader.jsx";
 
 function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
@@ -27,15 +25,14 @@ function App() {
   const [isImagePopup, setImagePopup] = useState(false);
 
   const [loggedIn, setLoggedIn] = useState(false);
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState({
-    imgPath: "",
-    text: "",
-  });
+  const [userEmail, setUserEmail] = useState("");
+  const [infoTooltipStatus, setInfoTooltipStatus] = useState("");
+  const [isInfoTooltipPopupOpen, setInfoTooltipPopupClass] = useState(false);
+  const [isHamburgerOpen, setHamburgerClass] = useState(false);
+  const [isPreloaderActive, setPreloaderClass] = useState(true);
+  const [isLoading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-
-  const [infoTooltip, setInfoTooltip] = useState(false);
 
   const [currentUser, setCurrentUser] = useState({});
   const [cards, setUserCards] = useState([]);
@@ -47,11 +44,21 @@ function App() {
     setIsAddPlacePopupOpen(false);
     setImagePopup(false);
     setDeletePopupOpen(false);
+    setInfoTooltipPopupClass(false);
+    setInfoTooltipStatus("");
   }, []);
 
-  const handleInfoTooltip = () => {
-    setInfoTooltip(!infoTooltip);
-  };
+  const handleHamburgerClick = useCallback(() => {
+    if (isHamburgerOpen === false) {
+      setHamburgerClass(true);
+    } else {
+      setHamburgerClass(false);
+    }
+  }, [isHamburgerOpen]);
+
+  // const handleInfoTooltip = () => {
+  //   setInfoTooltip(!infoTooltip);
+  // };
 
   const closePopupEsc = useCallback(
     (evt) => {
@@ -100,14 +107,13 @@ function App() {
   }
 
   useEffect(() => {
-    if (loggedIn) {
+    loggedIn &&
       Promise.all([api.getInfo(), api.getCards()])
         .then(([dataUser, dataCard]) => {
           setCurrentUser(dataUser);
           setUserCards(dataCard);
         })
         .catch((err) => console.error(`Ошибка загрузки исходных данных ${err}`));
-    }
   }, [loggedIn]);
 
   function handleDel(evt) {
@@ -171,26 +177,26 @@ function App() {
   //   }
   // }, [loggedIn]);
 
-  function handleRegister(password, email) {
-    register(password, email)
-      .then(() => {
-        setInfoTooltip(true);
-        navigate("/sing-in");
-        // setEmail(res.data.email);
-        setMessage({
-          imgPath: unionTrue,
-          text: "Вы успешно зарегистрировались!",
-        });
-      })
-      .catch((err) => {
-        setInfoTooltip(true);
-        console.log(err);
-        setMessage({
-          imgPath: unionFalse,
-          text: "Что-то пошло не так! Попробуйте ещё раз.",
-        });
-      });
-  }
+  const handleUserRegistration = useCallback(
+    async (userData) => {
+      setLoading(true);
+      try {
+        const data = await authApi.register(userData);
+        if (data) {
+          setInfoTooltipStatus("success");
+          setInfoTooltipPopupClass(true);
+          navigate("/sign-in", { replace: true });
+        }
+      } catch (err) {
+        console.error(err);
+        setInfoTooltipStatus("fail");
+        setInfoTooltipPopupClass(true);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [navigate]
+  );
 
   // useEffect(() => {
   //   const jwt = localStorage.getItem("jwt");
@@ -212,22 +218,63 @@ function App() {
   //   navigate("/sing-in");
   // };
 
-  function handleLogin(password, email) {
-    authorize(password, email)
-      .then((res) => {
-        localStorage.setItem("jwt", res.token);
+  const handleUserAuthorization = useCallback(
+    async (userData) => {
+      setLoading(true);
+      try {
+        const data = await authApi.authorize(userData);
+        if (data.token) {
+          localStorage.setItem("token", data.token);
+          setLoggedIn(true);
+          setUserEmail(userData.email);
+          navigate("/", { replace: true });
+        }
+      } catch (err) {
+        console.error(err);
+        setInfoTooltipStatus("fail");
+        setInfoTooltipPopupClass(true);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [navigate]
+  );
+
+  const handleUserLogOut = useCallback(() => {
+    localStorage.removeItem("token");
+    setLoggedIn(false);
+    setUserEmail("");
+    setHamburgerClass(false);
+    navigate("/sign-in", { replace: true });
+  }, [navigate]);
+
+  const tokenCheck = useCallback(async () => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const user = await authApi.getContent(token);
+        if (!user) {
+          throw new Error("Данные пользователя отсутствует");
+        }
+        setUserEmail(user.data.email);
         setLoggedIn(true);
-        setEmail(email);
-        navigate("/");
-      })
-      .catch((err) => {
-        setInfoTooltip(true);
-        setMessage({
-          imgPath: unionFalse,
-          text: "Что-то пошло не так! Попробуйте ещё раз.",
-        });
-        console.error(`Ошбика при авторизации ${err}`);
-      });
+        navigate("/", { replace: true });
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setPreloaderClass(false);
+      }
+    } else {
+      setPreloaderClass(false);
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    tokenCheck();
+  }, [tokenCheck]);
+
+  if (isPreloaderActive) {
+    return <Preloader isActive={isPreloaderActive} />;
   }
 
   return (
@@ -235,25 +282,57 @@ function App() {
       <div className="page">
         <Routes>
           <Route
-            path="/sing-in"
+            path="/"
             element={
-              <>
-                <Header name="singin" /> <Main name="singin" onLogin={handleLogin} />
-              </>
+              <AppLayout
+                email={userEmail}
+                isOpen={isHamburgerOpen}
+                onHamburgerClick={handleHamburgerClick}
+                onLogOut={handleUserLogOut}
+              />
             }
-          />
+          >
+            <Route
+              index
+              element={
+                <ProtectedRouteElement
+                  element={Main}
+                  cards={cards}
+                  onEditAvatar={handleEditAvatarClick}
+                  onEditProfile={handleEditProfileClick}
+                  onAddPlace={handleAddPlaceClick}
+                  onCardClick={handleCardClick}
+                  onDelete={handleDelete}
+                  loggedIn={loggedIn}
+                />
+              }
+            />
+            <Route
+              path="/sign-in"
+              element={<Login onLogin={handleUserAuthorization} onLoading={isLoading} />}
+            />
+            <Route
+              path="/sign-up"
+              element={<Register onRegistr={handleUserRegistration} onLoading={isLoading} />}
+            />
+          </Route>
+        </Routes>
+
+        {/* <Routes>
+          <Route path="/sing-in" element={<Login onLogin={onLogin} />} />
           <Route
             path="/sing-up"
             element={
               <>
-                <Header name="singup" /> <Main name="singup" onRegister={handleRegister} />
+                <Register onRegister={onRegister} />
+                <Header name="sing-up" /> <Main name="sing-up" onRegister={onRegister} />
               </>
             }
           />
           <Route
             path="/"
             element={
-              <ProtectedRoute
+              <ProtectedRouteElement
                 element={Main}
                 onEditProfile={handleEditProfileClick}
                 onAddPlace={handleAddPlaceClick}
@@ -263,11 +342,11 @@ function App() {
                 cards={cards}
                 loggedIn={loggedIn}
                 email={email}
-                // onSingOut={onSingOut}
+                onSingOut={onSingOut}
               />
             }
           />
-        </Routes>
+        </Routes> */}
         {/* <Header /> */}
         {/* <Main
           onEditProfile={handleEditProfileClick}
@@ -277,7 +356,7 @@ function App() {
           onDelete={handleDelete}
           cards={cards}
         /> */}
-        <Footer />
+
         <EditProfilePopup
           onUpdateUser={handleUpdateUser}
           isOpen={isEditProfilePopupOpen}
@@ -305,7 +384,11 @@ function App() {
           onSubmit={handleDel}
         />
 
-        <InfoTooltip isOpen={infoTooltip} onClose={handleInfoTooltip} message={message} />
+        <InfoTooltip
+          isOpen={isInfoTooltipPopupOpen}
+          onClose={closeAllPopups}
+          status={infoTooltipStatus}
+        />
 
         <ImagePopup card={selectedCard} isOpen={isImagePopup} onClose={closeAllPopups} />
       </div>

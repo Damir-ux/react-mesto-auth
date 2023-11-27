@@ -1,22 +1,33 @@
 import React from "react";
-import icon_ok from "../../images/popup_icon_ok.svg";
-import icon_fail from "../../images/popup_icon_fail.svg";
+import Popup from "../Popup/Popup.jsx";
 
-function InfoTooltip(props) {
-  const { name, isSignIn, isOpen, onClose } = props;
-  const icon = isSignIn ? icon_ok : icon_fail;
-  const message = isSignIn
-    ? "Вы успешно зарегистрировались!"
-    : "Что-то пошло не так! Попробуйте ещё раз.";
+function InfoTooltip({ isOpen, onClose, status }) {
+  function handleClassToggle(status) {
+    if (status === "success") {
+      return "popup__status-icon_type_success";
+    } else if (status === "fail") {
+      return "popup__status-icon_type_fail";
+    } else {
+      return "";
+    }
+  }
 
+  function handleTextToggle(status) {
+    if (status === "success") {
+      return "Вы успешно зарегистрировались!";
+    } else if (status === "fail") {
+      return "Что-то пошло не так! Попробуйте ещё раз.";
+    } else {
+      return "";
+    }
+  }
   return (
-    <div className={`popup popup_type_${name} ${isOpen ? "popup_opened" : ""}`}>
-      <div className="popup__container popup__container-tooltip">
-        <button className="popup__close" aria-label="Закрыть" onClick={onClose}></button>
-        <img className="popup__tooltip-img" src={icon} alt="Что то пошло не так" />
-        <h2 className="popup__title">{message}</h2>
+    <Popup isOpen={isOpen} onClose={onClose} type="form">
+      <div className="popup__status-wrapper">
+        <div className={`popup__status-icon ${handleClassToggle(status)}`}></div>
+        <p className="popup__status-text">{handleTextToggle(status)}</p>
       </div>
-    </div>
+    </Popup>
   );
 }
 

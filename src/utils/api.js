@@ -1,88 +1,96 @@
-// API CLASS
 class Api {
   constructor(options) {
-    this._serverUrl = options.baseUrl;
+    this._url = options.baseUrl;
     this._headers = options.headers;
+    this._authorization = options.headers.authorization;
   }
-  // CHECKING THE SERVER RESPONSE METHOD
+
   _checkResponse(res) {
-    return res.ok ? res.json() : Promise.reject(`Ошибка: ${res.status}`);
+    return res.ok ? res.json() : Promise.reject;
   }
-  // REQUEST METHOD
-  _request(url, options) {
-    return fetch(url, options).then(this._checkResponse);
+
+  getInfo() {
+    return fetch(`${this._url}/users/me`, {
+      headers: {
+        authorization: this._authorization,
+      },
+    }).then(this._checkResponse);
   }
-  // GET USER INFO METHOD
-  getUserInfo() {
-    return this._request(`${this._serverUrl}/users/me`, {
-      headers: this._headers,
-    });
+
+  getCards() {
+    return fetch(`${this._url}/cards`, {
+      headers: {
+        authorization: this._authorization,
+      },
+    }).then(this._checkResponse);
   }
-  // SEND USER INFO METHOD
-  setUserInfo(userData) {
-    return this._request(`${this._serverUrl}/users/me`, {
+
+  setUserInfo(data) {
+    return fetch(`${this._url}/users/me`, {
       method: "PATCH",
       headers: this._headers,
       body: JSON.stringify({
-        name: `${userData.name}`,
-        about: `${userData.about}`,
+        name: data.name,
+        about: data.profession,
       }),
-    });
+    }).then(this._checkResponse);
   }
-  // SET USER AVATAR METHOD
-  setUserAvatar(avatarData) {
-    return this._request(`${this._serverUrl}/users/me/avatar`, {
+
+  setAvatar(data) {
+    return fetch(`${this._url}/users/me/avatar`, {
       method: "PATCH",
       headers: this._headers,
       body: JSON.stringify({
-        avatar: `${avatarData.avatar}`,
+        avatar: data.avatar,
       }),
-    });
+    }).then(this._checkResponse);
   }
-  // GET INITIAL CARDS METHOD
-  getInitialCards() {
-    return this._request(`${this._serverUrl}/cards`, {
-      headers: this._headers,
-    });
-  }
-  // SEND NEW CARD INFO METHOD
-  sendNewCardInfo(cardData) {
-    return this._request(`${this._serverUrl}/cards`, {
+
+  addCard(data) {
+    return fetch(`${this._url}/cards`, {
       method: "POST",
       headers: this._headers,
       body: JSON.stringify({
-        name: `${cardData.name}`,
-        link: `${cardData.link}`,
+        name: data.title,
+        link: data.link,
       }),
-    });
+    }).then(this._checkResponse);
   }
-  // DELETE CARD METHOD
-  deleteCard(id) {
-    return this._request(`${this._serverUrl}/cards/${id}`, {
+
+  deleteCard(cardId) {
+    return fetch(`${this._url}/cards/${cardId}`, {
       method: "DELETE",
-      headers: this._headers,
-    });
+      headers: {
+        authorization: this._authorization,
+      },
+    }).then(this._checkResponse);
   }
-  // CHANGE LIKE CARD STATUS METHOD
-  changeLikeCardStatus(id, isLiked) {
-    if (isLiked) {
-      return this._request(`${this._serverUrl}/cards/${id}/likes`, {
-        method: "DELETE",
-        headers: this._headers,
-      });
-    } else {
-      return this._request(`${this._serverUrl}/cards/${id}/likes`, {
-        method: "PUT",
-        headers: this._headers,
-      });
-    }
+
+  addLike(cardId) {
+    return fetch(`${this._url}/cards/${cardId}/likes`, {
+      method: "PUT",
+      headers: {
+        authorization: this._authorization,
+      },
+    }).then(this._checkResponse);
+  }
+
+  removeLike(cardId) {
+    return fetch(`${this._url}/cards/${cardId}/likes`, {
+      method: "DELETE",
+      headers: {
+        authorization: this._authorization,
+      },
+    }).then(this._checkResponse);
   }
 }
 
-export const api = new Api({
+const api = new Api({
   baseUrl: "https://mesto.nomoreparties.co/v1/cohort-74",
   headers: {
     authorization: "751e4ae6-349e-4ceb-83c0-e92078a56011",
     "Content-Type": "application/json",
   },
 });
+
+export default api;

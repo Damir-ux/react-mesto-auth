@@ -1,19 +1,30 @@
-import { Link } from "react-router-dom";
-import React, { useContext } from "react";
-import CurrentUserContext from "../../contexts/CurrentUserContext";
+import React from "react";
 
-export default function Form({ name, titleButton, children, isValid, onSubmit }) {
-  const isSend = useContext(CurrentUserContext);
+function Form({ name, buttonText, onSubmit, isFormValid, ...props }) {
   return (
-
-{children}
-{{login:
-    <button className={"profile__avatar" type="button" onClick={onEditAvatar}>
-    <img src={currentUser.avatar} alt="Место" className="profile__under-img" />
-  </button>
-
-}}
-
-
+    <form
+      action="#"
+      name={`${name}`}
+      id={`${name}`}
+      className={`form form_type_${name} ${
+        name === "login" || name === "registr" ? "form_place_authorization" : ""
+      }`}
+      noValidate
+      onSubmit={onSubmit}
+    >
+      {props.children}
+      <button
+        type="submit"
+        form={`${name}`}
+        className={`form__btn-submit ${
+          name === "login" || name === "registr" ? "form__btn-submit_place_authorization" : ""
+        }`}
+        disabled={isFormValid ? false : true}
+      >
+        {buttonText}
+      </button>
+    </form>
   );
 }
+
+export default Form;

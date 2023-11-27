@@ -1,54 +1,62 @@
-import Header from "../Header/Header.jsx";
 import React from "react";
-import useformValidation from "../../utils/formValidation";
+import useValidation from "../../utils/useValidation";
 
-export default function Register({ name, handleRegister }) {
-  const { valuen, errors, isValid, isInputValid, handleChange } = useformValidation();
+import AuthScreen from "../AuthScreen/AuthScreen.jsx";
 
-  function onRegister(evt) {
-    evt.preventDefault();
-    handleRegister(valuen.password, valuen.email);
+function Register({ onRegistr, onLoading }) {
+  const { values, errors, isFormValid, onChange } = useValidation();
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    onRegistr(values);
   }
-
   return (
-    <>
-      {/* <Header title="Войти" /> */}
-      <form className="register__conteiner" onSubmit={onRegister}>
-        <h1 className="register__title">Регистрация</h1>
-
+    <AuthScreen
+      name="registr"
+      title="Регистрация"
+      buttonText={onLoading ? "Регистрация..." : "Зарегистрироваться"}
+      onSubmit={handleSubmit}
+      isFormValid={isFormValid}
+    >
+      <label className="form__input-wrapper">
         <input
-          name="email"
-          className="register__input"
           type="email"
+          name="email"
+          form="registr"
           required
           placeholder="Email"
-          value={valuen.email}
-          onChange={handleChange}
-          minLength="2"
-          maxLength="40"
-          isInputValid={isInputValid.email}
-          error={errors.email}
+          className={`form__input form__input_place_authorization ${
+            errors.email ? "form__input_type_error" : ""
+          }`}
+          id="email-input"
+          onChange={onChange}
+          value={values.email || ""}
         />
-
+        <span className={`form__input-error ${errors.email ? "form__input-error_active" : ""}`}>
+          {errors.email || ""}
+        </span>
+      </label>
+      <label className="form__input-wrapper">
         <input
-          name="password"
-          className="register__input"
           type="password"
+          name="password"
+          form="registr"
           required
+          minLength="6"
           placeholder="Пароль"
-          value={valuen.password}
-          minLength="2"
-          maxLength="40"
-          oonChange={handleChange}
+          className={`form__input form__input_place_authorization ${
+            errors.password ? "form__input_type_error" : ""
+          }`}
+          id="password-input"
+          onChange={onChange}
+          value={values.password || ""}
         />
-        <button className="registerg__button">Регистрация</button>
-      </form>
-      <p className="register__text">
-        Уже зарегистрированы?
-        <button className="register__button-exit" type="submit">
-          Войти
-        </button>
-      </p>
-    </>
+        <span className={`form__input-error ${errors.password ? "form__input-error_active" : ""}`}>
+          {errors.password || ""}
+        </span>
+      </label>
+    </AuthScreen>
   );
 }
+
+export default Register;
