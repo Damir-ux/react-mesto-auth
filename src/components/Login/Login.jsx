@@ -2,54 +2,42 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../Header/Header.jsx";
 import React from "react";
+import useformValidation from "../../utils/formValidation";
+import SectionLogin from "../SectionLogin/SectionLogin.jsx";
 
-function Login({ onLogin, handleShowInfoMessage }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const navigate = useNavigate();
+export default function Login({ name, handleLogin }) {
+  const { valuen, errors, isValid, isInputValid, handleChange } = useformValidation();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onLogin({
-      password,
-      email,
-    });
-  };
-
-  function onHavigeteRegister() {
-    navigate("/sing-up", { replace: true });
+  function onLogin(evt) {
+    evt.preventDefault();
+    handleLogin(valuen.password, valuen.email);
   }
 
   return (
     <>
-      <Header title="Регистрация" onClick={onHavigeteRegister} isOpen={false} />
-      <form className="authorization__conteiner" onSubmit={handleSubmit}>
-        <h1 className="authorization__title">Вход</h1>
-
+      <SectionLogin name={name} onSubmit={onLogin} isValid={isValid}>
         <input
           id="form-email"
-          name="inputEmail"
+          name="email"
           className="authorization__input"
           type="email"
           required
           placeholder="Email"
-          value={email || ""}
-          onChange={(e) => setEmail(e.target.value)}
+          value={valuen.email}
+          onChange={handleChange}
         />
         <input
           id="form-opened-account"
-          name="inputOpened"
+          name="password"
           className="authorization__input"
           type="password"
           required
           placeholder="Пароль"
-          value={password || ""}
-          onChange={(e) => setPassword(e.target.value)}
+          value={valuen.password}
+          onChange={handleChange}
         />
         <button className="authorization__button">Войти</button>
-      </form>
+      </SectionLogin>
     </>
   );
 }
-
-export default Login;

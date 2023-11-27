@@ -1,66 +1,54 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Header from "../Header/Header.jsx";
 import React from "react";
+import useformValidation from "../../utils/formValidation";
 
-function Register({ onRegister }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const navigate = useNavigate();
+export default function Register({ name, handleRegister }) {
+  const { valuen, errors, isValid, isInputValid, handleChange } = useformValidation();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onRegister({
-      email,
-      password,
-    });
-  };
-
-  function onHavigeteLogin() {
-    navigate("/sing-in", { replace: true });
+  function onRegister(evt) {
+    evt.preventDefault();
+    handleRegister(valuen.password, valuen.email);
   }
 
   return (
     <>
-      <Header title="Войти" onClick={onHavigeteLogin} />
-      <form className="register__conteiner" onSubmit={handleSubmit}>
+      {/* <Header title="Войти" /> */}
+      <form className="register__conteiner" onSubmit={onRegister}>
         <h1 className="register__title">Регистрация</h1>
 
         <input
-          id="form-email"
-          name="inputEmail"
+          name="email"
           className="register__input"
           type="email"
           required
           placeholder="Email"
-          value={email || ""}
+          value={valuen.email}
+          onChange={handleChange}
           minLength="2"
           maxLength="40"
-          onChange={(e) => setEmail(e.target.value)}
+          isInputValid={isInputValid.email}
+          error={errors.email}
         />
 
         <input
-          id="form-opened-account"
-          name="inputOpened"
+          name="password"
           className="register__input"
           type="password"
           required
           placeholder="Пароль"
-          value={password || ""}
+          value={valuen.password}
           minLength="2"
           maxLength="40"
-          onChange={(e) => setPassword(e.target.value)}
+          oonChange={handleChange}
         />
         <button className="registerg__button">Регистрация</button>
       </form>
       <p className="register__text">
         Уже зарегистрированы?
-        <button className="register__button-exit" type="submit" onClick={onHavigeteLogin}>
+        <button className="register__button-exit" type="submit">
           Войти
         </button>
       </p>
     </>
   );
 }
-
-export default Register;

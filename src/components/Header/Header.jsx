@@ -5,54 +5,32 @@ import { Link } from "react-router-dom";
 import { useLocation, useNavigate } from "react-router";
 import React from "react";
 
-export default function Header({ email, onSingOut }) {
-  const [show, setShow] = useState(false);
-  const pathname = useLocation();
-  const navigate = useNavigate();
-
-  function handleShow() {
-    setShow(!show);
+export default function Header({ email, onSingOut, name, dataUser }) {
+  const [count, setCount] = useState(0);
+  function handleClick() {
+    count === 0 ? setCount(1) : setCount(0);
   }
 
-  const burgerClassName = show ? "header__burger-nav-active" : "header__burger-nav";
+  // const burgerClassName = show ? "header__burger-nav-active" : "header__burger-nav";
 
-  function exit() {
-    navigate("/sing-in", { replace: true });
-    onSingOut();
-  }
+  // function exit() {
+  //   navigate("/sing-in", { replace: true });
+  //   onSingOut();
+  // }
 
   return (
     <>
-      {show && (
-        <div className="header__bar">
-          <p className="header__bar-email">{email}</p>
-          <button onClick={exit} className="header__bar-button" to={"/sign-in"}>
-            Выйти
-          </button>
-        </div>
-      )}
       <header className="header">
         <img src={logo} alt="Лого" className="header__logo" />
-        {pathname.pathname === "/sing-up" && (
-          <Link className="header__title-button" to={"/sing-in"}>
-            Войти
+        {name === "singup" || name === "singin" ? (
+          <Link className="header__title-button" to={name === "singup" ? "/sing-in" : "/sing-up"}>
+            {name !== "singup" ? "Регистрация" : "Войти"}
           </Link>
-        )}
-        {pathname.pathname === "/sing-in" && (
-          <Link className="header__title-button" to={"/sing-up"}>
-            Регистрация
-          </Link>
-        )}
-        {pathname.pathname === "/" && (
+        ) : (
           <>
-            <div className="header__burger" onClick={handleShow}>
-              <div className={burgerClassName} />
-            </div>
-            <div className="header__burger-box">
-              <p className="header__burger-email">{email}</p>
-              <button onClick={exit} className="header__burger-button">
-                Выйти
-              </button>
+            <div className={`header__bar ${count !== 0 ? "header__bar_opened" : ""}`}>
+              <p className="header__bar-email">{dataUser}</p>
+              <button onClick={handleClick} className="header__bar-button" to={"/sign-in"}></button>
             </div>
           </>
         )}

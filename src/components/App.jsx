@@ -15,7 +15,7 @@ import AddPlacePopup from "./AddPlacePopup/AddPlacePopup.jsx";
 import ProtectedRoute from "./ProtectedRoute/ProtectedRoute.jsx";
 import Register from "./Register/Register.jsx";
 import Login from "./Login/Login.jsx";
-import * as auth from "../utils/auth.js";
+import { register, authorize, getContent } from "../utils/auth.js";
 import InfoTooltip from "./InfoTooltip/InfoTooltip.jsx";
 
 function App() {
@@ -171,21 +171,16 @@ function App() {
   //   }
   // }, [loggedIn]);
 
-  function onRegister({ password, email }) {
-    auth
-      .register({ password, email })
-      .then((res) => {
-        navigate("/sing-in");
+  function handleRegister(password, email) {
+    register(password, email)
+      .then(() => {
         setInfoTooltip(true);
-        setEmail(res.data.email);
+        navigate("/sing-in");
+        // setEmail(res.data.email);
         setMessage({
           imgPath: unionTrue,
           text: "Вы успешно зарегистрировались!",
         });
-        if (res.jwt) {
-          setLoggedIn(true);
-          sessionStorage.setItem("jwt", res.jwt);
-        }
       })
       .catch((err) => {
         setInfoTooltip(true);
@@ -197,41 +192,41 @@ function App() {
       });
   }
 
-  useEffect(() => {
-    const jwt = localStorage.getItem("jwt");
+  // useEffect(() => {
+  //   const jwt = localStorage.getItem("jwt");
 
-    if (jwt) {
-      auth
-        .getContent(jwt)
-        .then((res) => {
-          setEmail(res.data.email);
-          setLoggedIn(true);
-          navigate("/", { replace: true });
-        })
-        .catch((err) => console.log(err));
-    }
-  }, [navigate]);
+  //   if (jwt) {
+  //     getContent(jwt)
+  //       .then((res) => {
+  //         setEmail(res.data.email);
+  //         setLoggedIn(true);
+  //         navigate("/", { replace: true });
+  //       })
+  //       .catch((err) => console.log(err));
+  //   }
+  // }, [navigate]);
 
-  const onSingOut = () => {
-    localStorage.removeItem("jwt");
-    setLoggedIn(false);
-    navigate("/sing-in");
-  };
+  // const onSingOut = () => {
+  //   localStorage.removeItem("jwt");
+  //   setLoggedIn(false);
+  //   navigate("/sing-in");
+  // };
 
-  function onLogin({ password, email }) {
-    auth
-      .authorize({ password, email })
-      .then(() => {
+  function handleLogin(password, email) {
+    authorize(password, email)
+      .then((res) => {
+        localStorage.setItem("jwt", res.token);
         setLoggedIn(true);
         setEmail(email);
         navigate("/");
       })
-      .catch(() => {
+      .catch((err) => {
         setInfoTooltip(true);
         setMessage({
           imgPath: unionFalse,
           text: "Что-то пошло не так! Попробуйте ещё раз.",
         });
+        console.error(`Ошбика при авторизации ${err}`);
       });
   }
 
@@ -239,12 +234,27 @@ function App() {
     <CurrentUserContext.Provider value={currentUser}>
       <div className="page">
         <Routes>
-          <Route path="/sing-in" element={<Login onLogin={onLogin} />} />
-          <Route path="/sing-up" element={<Register onRegister={onRegister} />} />
+          <Route
+            path="/sing-in"
+            element={
+              <>
+                <Header name="singin" /> <Main name="singin" onLogin={handleLogin} />
+              </>
+            }
+          />
+          <Route
+            path="/sing-up"
+            element={
+              <>
+                <Header name="singup" /> <Main name="singup" onRegister={handleRegister} />
+              </>
+            }
+          />
           <Route
             path="/"
             element={
               <ProtectedRoute
+                element={Main}
                 onEditProfile={handleEditProfileClick}
                 onAddPlace={handleAddPlaceClick}
                 onEditAvatar={handleEditAvatarClick}
@@ -253,7 +263,7 @@ function App() {
                 cards={cards}
                 loggedIn={loggedIn}
                 email={email}
-                onSingOut={onSingOut}
+                // onSingOut={onSingOut}
               />
             }
           />

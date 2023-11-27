@@ -1,36 +1,31 @@
-export const BASE_URL = "https://auth.nomoreparties.co";
+export const BASEURL = "https://auth.nomoreparties.co";
 
-const handleResponse = (res) => (res.ok ? res.json() : Promise.reject(`Ошибка ${res.status}`));
+function handleResponse(res) {
+  return res.ok ? res.json() : Promise.reject(`${res.status} ${res.statusText}`);
+}
 
-export const register = ({ password, email }) => {
-  return fetch(`${BASE_URL}/signup`, {
+export function register(password, email) {
+  return fetch(`${BASEURL}/signup`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ password, email }),
-  }).then(handleResponse);
-};
+    body: JSON.stringify({ password: password, email: email }),
+  }).then((res) => handleResponse(res));
+}
 
-export const authorize = ({ password, email }) => {
-  return fetch(`${BASE_URL}/signin`, {
+export function authorize(password, email) {
+  return fetch(`${BASEURL}/signin`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ email, password }),
-  })
-    .then(handleResponse)
-    .then((data) => {
-      if (data.token) {
-        localStorage.setItem("jwt", data.token);
-        return data.token;
-      }
-    });
-};
+    body: JSON.stringify({ password: password, email: email }),
+  }).then((res) => handleResponse(res));
+}
 
 export const getContent = (token) => {
-  return fetch(`${BASE_URL}/users/me`, {
+  return fetch(`${BASEURL}/users/me`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
