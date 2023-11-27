@@ -4,7 +4,7 @@ import NavBar from "../NavBar/NavBar.jsx";
 function Header({ email, onHamburgerClick, isOpen, onLogOut }) {
   return (
     <header className="header">
-      <img src={logo} alt="Лого" className="header__logo" />
+      <div className="logo header__logo"></div>
       <NavBar
         email={email}
         isOpen={isOpen}
