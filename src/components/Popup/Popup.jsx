@@ -28,7 +28,7 @@ function Popup({ isOpen, onClose, type, ...props }) {
       className={`popup ${isOpen ? "popup_opened" : ""} popup__container-tooltip`}
       onMouseDown={closeByClickOnOverlay}
     >
-      <div className={`popup__container popup__container_type_${type}`}>
+      <div className={`popup__contain popup__contain_type_${type}`}>
         {props.children}
         <button type="button" className="popup__close" onClick={onClose} />
       </div>
