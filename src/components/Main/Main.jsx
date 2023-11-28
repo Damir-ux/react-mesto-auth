@@ -14,10 +14,6 @@ export default function Main({
 }) {
   const currentUser = useContext(CurrentUserContext);
 
-  // const [userName, setUserName] = useState("");
-  // const [userDescription, setUserDescription] = useState("");
-  // const [userAvatar, setUserAvatar] = useState("");
-
   return (
     <main className="content">
       <section className="profile">

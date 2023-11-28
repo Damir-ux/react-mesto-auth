@@ -28,7 +28,7 @@ function App() {
   const [userEmail, setUserEmail] = useState("");
   const [infoTooltipStatus, setInfoTooltipStatus] = useState("");
   const [isInfoTooltipPopupOpen, setInfoTooltipPopupClass] = useState(false);
-  const [isHamburgerOpen, setHamburgerClass] = useState(false);
+
   const [isPreloaderActive, setPreloaderClass] = useState(true);
   const [isLoading, setLoading] = useState(false);
 
@@ -47,18 +47,6 @@ function App() {
     setInfoTooltipPopupClass(false);
     setInfoTooltipStatus("");
   }, []);
-
-  const handleHamburgerClick = useCallback(() => {
-    if (isHamburgerOpen === false) {
-      setHamburgerClass(true);
-    } else {
-      setHamburgerClass(false);
-    }
-  }, [isHamburgerOpen]);
-
-  // const handleInfoTooltip = () => {
-  //   setInfoTooltip(!infoTooltip);
-  // };
 
   const closePopupEsc = useCallback(
     (evt) => {
@@ -164,19 +152,6 @@ function App() {
       .catch((err) => console.error(`Ошибка добавления карточки ${err}`));
   }
 
-  // useEffect(() => {
-  //   if (loggedIn) {
-  //     Promise.all([api.getInfoUser(), api.getCardsList()])
-  //       .then(([userData, dataCards]) => {
-  //         setCurrentUser(userData);
-  //         setUserCards(dataCards);
-  //       })
-  //       .catch((err) => {
-  //         console.log(err);
-  //       });
-  //   }
-  // }, [loggedIn]);
-
   const handleUserRegistration = useCallback(
     async (userData) => {
       setLoading(true);
@@ -197,26 +172,6 @@ function App() {
     },
     [navigate]
   );
-
-  // useEffect(() => {
-  //   const jwt = localStorage.getItem("jwt");
-
-  //   if (jwt) {
-  //     getContent(jwt)
-  //       .then((res) => {
-  //         setEmail(res.data.email);
-  //         setLoggedIn(true);
-  //         navigate("/", { replace: true });
-  //       })
-  //       .catch((err) => console.log(err));
-  //   }
-  // }, [navigate]);
-
-  // const onSingOut = () => {
-  //   localStorage.removeItem("jwt");
-  //   setLoggedIn(false);
-  //   navigate("/sing-in");
-  // };
 
   const handleUserAuthorization = useCallback(
     async (userData) => {
@@ -244,7 +199,6 @@ function App() {
     localStorage.removeItem("token");
     setLoggedIn(false);
     setUserEmail("");
-    setHamburgerClass(false);
     navigate("/sign-in", { replace: true });
   }, [navigate]);
 
@@ -281,17 +235,7 @@ function App() {
     <CurrentUserContext.Provider value={currentUser}>
       <div className="page">
         <Routes>
-          <Route
-            path="/"
-            element={
-              <AppLayout
-                email={userEmail}
-                isOpen={isHamburgerOpen}
-                onHamburgerClick={handleHamburgerClick}
-                onLogOut={handleUserLogOut}
-              />
-            }
-          >
+          <Route path="/" element={<AppLayout email={userEmail} onLogOut={handleUserLogOut} />}>
             <Route
               index
               element={
@@ -317,46 +261,6 @@ function App() {
             />
           </Route>
         </Routes>
-
-        {/* <Routes>
-          <Route path="/sing-in" element={<Login onLogin={onLogin} />} />
-          <Route
-            path="/sing-up"
-            element={
-              <>
-                <Register onRegister={onRegister} />
-                <Header name="sing-up" /> <Main name="sing-up" onRegister={onRegister} />
-              </>
-            }
-          />
-          <Route
-            path="/"
-            element={
-              <ProtectedRouteElement
-                element={Main}
-                onEditProfile={handleEditProfileClick}
-                onAddPlace={handleAddPlaceClick}
-                onEditAvatar={handleEditAvatarClick}
-                onCardClick={handleCardClick}
-                onDelete={handleDelete}
-                cards={cards}
-                loggedIn={loggedIn}
-                email={email}
-                onSingOut={onSingOut}
-              />
-            }
-          />
-        </Routes> */}
-        {/* <Header /> */}
-        {/* <Main
-          onEditProfile={handleEditProfileClick}
-          onAddPlace={handleAddPlaceClick}
-          onEditAvatar={handleEditAvatarClick}
-          onCardClick={handleCardClick}
-          onDelete={handleDelete}
-          cards={cards}
-        /> */}
-
         <EditProfilePopup
           onUpdateUser={handleUpdateUser}
           isOpen={isEditProfilePopupOpen}
