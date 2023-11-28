@@ -59,8 +59,6 @@
 @import url(./blocks/popup/__status-text/popup__status-text.css);
 @import url(./blocks/popup/__status-wrapper/popup__status-wrapper.css);
 @import url(./blocks/popup/__container/popup__container.css);
-@import url(./blocks/popup/__contain/popup__contain.css);
-@import url(./blocks/popup/__contain/_type/popup__contain_type_form.css);
 
 @import url(./blocks/preloader/preloader.css);
 @import url(./blocks/preloader/_active/preloader_active.css);

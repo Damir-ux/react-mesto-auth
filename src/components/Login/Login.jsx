@@ -1,14 +1,14 @@
 import React from "react";
-import useValidation from "../../utils/useValidation";
+import useFormValidation from "../../utils/formValidation";
 
 import AuthScreen from "../AuthScreen/AuthScreen.jsx";
 
 function Login({ onLogin, onLoading }) {
-  const { values, errors, isFormValid, onChange } = useValidation();
+  const { valuen, errors, isValid, handleChange } = useFormValidation();
 
   function handleSubmit(e) {
     e.preventDefault();
-    onLogin(values);
+    onLogin(valuen);
   }
   return (
     <AuthScreen
@@ -16,7 +16,7 @@ function Login({ onLogin, onLoading }) {
       title="Вход"
       buttonText={onLoading ? "Вход..." : "Войти"}
       onSubmit={handleSubmit}
-      isFormValid={isFormValid}
+      isValid={isValid}
     >
       <label className="form__input-wrapper">
         <input
@@ -29,8 +29,8 @@ function Login({ onLogin, onLoading }) {
             errors.email ? "form__input_type_error" : ""
           }`}
           id="email-input"
-          onChange={onChange}
-          value={values.email || ""}
+          onChange={handleChange}
+          value={valuen.email || ""}
         />
         <span className={`form__input-error ${errors.email ? "form__input-error_active" : ""}`}>
           {errors.email || ""}
@@ -48,8 +48,8 @@ function Login({ onLogin, onLoading }) {
             errors.password ? "form__input_type_error" : ""
           }`}
           id="password-input"
-          onChange={onChange}
-          value={values.password || ""}
+          onChange={handleChange}
+          value={valuen.password || ""}
         />
         <span className={`form__input-error ${errors.password ? "form__input-error_active" : ""}`}>
           {errors.password || ""}

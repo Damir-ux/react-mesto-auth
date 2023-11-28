@@ -1,6 +1,6 @@
 import React from "react";
 
-function Form({ name, buttonText, onSubmit, isFormValid, ...props }) {
+function Form({ name, buttonText, onSubmit, isValid, ...props }) {
   return (
     <form
       action="#"
@@ -19,7 +19,7 @@ function Form({ name, buttonText, onSubmit, isFormValid, ...props }) {
         className={`form__btn-submit ${
           name === "login" || name === "registr" ? "form__btn-submit_place_authorization" : ""
         }`}
-        disabled={isFormValid ? false : true}
+        disabled={isValid ? false : true}
       >
         {buttonText}
       </button>
